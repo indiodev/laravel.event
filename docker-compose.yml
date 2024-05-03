@@ -1,5 +1,9 @@
 version: "3.8"
 
+networks:
+  webapp:
+    driver: bridge
+
 services:
   app:
     build:
@@ -17,6 +21,8 @@ services:
       - APP_KEY=base64:V9lMOMKFhL7IdZ9/3KcjtT24SIqRw+Oz7ObmYy9YvJQ=
     depends_on:
       - postgres
+    networks:
+      - webapp
 
   nginx:
     image: nginx:1.25.1-alpine-slim
@@ -27,20 +33,30 @@ services:
     volumes:
       - ./:/var/www/application
       - ./nginx:/etc/nginx/conf.d
+    networks:
+      - webapp
 
   postgres:
     env_file: .env
     image: bitnami/postgresql
     ports:
-      - ${DB_PORT}:5432
+      - "5432:5432"
+      # - ${DB_PORT}:5432
+
     expose:
       - 5432
     volumes:
       - storage_db:/var/lib/postgres/data
     environment:
-      POSTGRESQL_USERNAME: ${DB_USERNAME}
-      POSTGRESQL_PASSWORD: ${DB_PASSWORD}
-      POSTGRESQL_DATABASE: ${DB_DATABASE}
+      POSTGRESQL_USERNAME: laraevent
+      POSTGRESQL_PASSWORD: laraevent
+      POSTGRESQL_DATABASE: laraevent
+
+      # POSTGRESQL_USERNAME: ${DB_USERNAME}
+      # POSTGRESQL_PASSWORD: ${DB_PASSWORD}
+      # POSTGRESQL_DATABASE: ${DB_DATABASE}
+    networks:
+      - webapp
 
 volumes:
   storage_db:
